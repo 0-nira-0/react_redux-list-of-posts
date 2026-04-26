@@ -19,11 +19,7 @@ export const App: React.FC = () => {
 
   const author = useAppSelector(store => store.author);
   const selectedPost = useAppSelector(store => store.selectedPost);
-  const {
-    error: hasError,
-    loading,
-    posts,
-  } = useAppSelector(store => store.posts);
+  const { hasError, loaded, items } = useAppSelector(store => store.posts);
 
   useEffect(() => {
     dispatch(loadUsers());
@@ -49,9 +45,9 @@ export const App: React.FC = () => {
               <div className="block" data-cy="MainContent">
                 {!author && <p data-cy="NoSelectedUser">No user selected</p>}
 
-                {author && loading && <Loader />}
+                {author && !loaded && <Loader />}
 
-                {author && !loading && hasError && (
+                {author && loaded && hasError && (
                   <div
                     className="notification is-danger"
                     data-cy="PostsLoadingError"
@@ -60,15 +56,17 @@ export const App: React.FC = () => {
                   </div>
                 )}
 
-                {author && !loading && !hasError && posts.length === 0 && (
+                {author && loaded && !hasError && items.length === 0 && (
                   <div className="notification is-warning" data-cy="NoPostsYet">
                     No posts yet
                   </div>
                 )}
 
-                {author && !loading && !hasError && posts.length > 0 && (
+                {author && loaded && !hasError && items.length > 0 && (
                   <PostsList
-                    posts={posts}
+                    items={items}
+                    loaded={loaded}
+                    hasError={hasError}
                     selectedPostId={selectedPost?.id}
                     onPostSelected={post => dispatch(setSelectedPost(post))}
                   />

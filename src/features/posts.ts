@@ -5,9 +5,9 @@ import { Post } from '../types/Post';
 import { User } from '../types/User';
 
 const initialState = {
-  loading: false,
-  error: false,
-  posts: [] as Post[],
+  loaded: false,
+  hasError: false,
+  items: [] as Post[],
 };
 
 export const loadUserPosts = createAsyncThunk(
@@ -22,21 +22,21 @@ export const postsSlice = createSlice({
   initialState,
   reducers: {
     clearPosts: state => {
-      state.posts = [];
+      state.items = [];
     },
   },
   extraReducers(builder) {
     builder.addCase(loadUserPosts.pending, state => {
-      state.error = false;
-      state.loading = true;
+      state.hasError = false;
+      state.loaded = false;
     });
     builder.addCase(loadUserPosts.rejected, state => {
-      state.error = true;
-      state.loading = false;
+      state.hasError = true;
+      state.loaded = true;
     });
     builder.addCase(loadUserPosts.fulfilled, (state, action) => {
-      state.posts = action.payload;
-      state.loading = false;
+      state.items = action.payload;
+      state.loaded = true;
     });
   },
 });

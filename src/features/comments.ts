@@ -6,9 +6,9 @@ import { Post } from '../types/Post';
 import * as commentsApi from '../api/comments';
 
 const initialState = {
-  loading: false,
-  error: false,
-  comments: [] as Comment[],
+  loaded: false,
+  hasError: false,
+  items: [] as Comment[],
 };
 
 export const loadPostComments = createAsyncThunk(
@@ -21,6 +21,7 @@ export const loadPostComments = createAsyncThunk(
 export const deletePostComment = createAsyncThunk(
   'comments/deleteComment',
   async (comment: Comment) => {
+    if (!comment.id) throw new Error();
     return commentsApi.deleteComment(comment.id);
   },
 );
@@ -30,44 +31,44 @@ export const commentsSlice = createSlice({
   initialState,
   reducers: {
     addComment: (state, action: PayloadAction<Comment>) => {
-      state.comments.push(action.payload);
+      state.items.push(action.payload);
     },
     deleteComment: (state, action: PayloadAction<Comment['id']>) => {
-      state.comments = state.comments.filter(
+      state.items = state.items.filter(
         comment => comment.id !== action.payload,
       );
     },
     setError: (state, action: PayloadAction<boolean>) => {
-      state.error = action.payload;
+      state.hasError = action.payload;
     },
   },
   extraReducers(builder) {
     builder.addCase(loadPostComments.pending, state => {
-      state.error = false;
-      state.loading = true;
+      state.hasError = false;
+      state.loaded = false;
     });
     builder.addCase(loadPostComments.rejected, state => {
-      state.error = true;
-      state.loading = false;
+      state.hasError = true;
+      state.loaded = true;
     });
     builder.addCase(loadPostComments.fulfilled, (state, action) => {
-      state.comments = action.payload;
-      state.loading = false;
+      state.items = action.payload;
+      state.loaded = true;
     });
     builder.addCase(deletePostComment.pending, (state, action) => {
-      state.comments = state.comments.filter(
+      state.items = state.items.filter(
         comment => comment.id !== action.meta.arg.id,
       );
-      state.error = false;
-      state.loading = true;
+      state.hasError = false;
+      state.loaded = false;
     });
     builder.addCase(deletePostComment.rejected, (state, action) => {
-      state.comments.push(action.meta.arg);
-      state.error = true;
-      state.loading = false;
+      state.items.push(action.meta.arg);
+      state.hasError = true;
+      state.loaded = true;
     });
     builder.addCase(deletePostComment.fulfilled, state => {
-      state.loading = false;
+      state.loaded = true;
     });
   },
 });

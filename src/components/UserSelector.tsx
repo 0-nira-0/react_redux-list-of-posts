@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { getUsersFromStore } from '../features/users';
 import { setUser } from '../features/author';
 
 export const UserSelector = () => {
@@ -9,7 +8,11 @@ export const UserSelector = () => {
   // we load them once in the `UsersContext` when the `App` is opened
   // and now we can easily reuse the `UserSelector` in any form
   const selectedUser = useAppSelector(store => store.author);
-  const users = useAppSelector(getUsersFromStore);
+  const {
+    items: users,
+    loaded,
+    hasError,
+  } = useAppSelector(store => store.users);
   const [expanded, setExpanded] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -61,7 +64,15 @@ export const UserSelector = () => {
 
       <div className="dropdown-menu" id="dropdown-menu" role="menu">
         <div className="dropdown-content">
-          {users.length !== 0 &&
+          {!loaded && <div className="dropdown-item">Loading...</div>}
+          {loaded && hasError && (
+            <div className="dropdown-item has-text-danger">
+              Failed to load users
+            </div>
+          )}
+          {loaded &&
+            !hasError &&
+            users.length !== 0 &&
             users.map(user => (
               <a
                 key={user.id}
